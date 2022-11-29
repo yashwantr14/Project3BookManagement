@@ -2,13 +2,10 @@ const express = require("express")
 const router = express.Router()
 const userController = require("../controllers/userController");
 
-//
-router.post("/createUser",userController.createUser)
-
 const{createUser }=require('../controllers/userController')
 const{createBook}=require('../controllers/bookController')
 
-
+//****************************** Post API's ***************************************/
 router.post("/register",createUser)
 router.post('/books',createBook)
 

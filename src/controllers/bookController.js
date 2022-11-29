@@ -52,5 +52,21 @@ const createBook = async function (req, res){
   
 }
 
+exports.getBooks = async (req,res)=>{
+try {
+    let query = req.query
+    if(Object.keys(query).length == 0){
+        let desiredBooks = await bookModel.find({isDeleted:false}).populate("userId")
+        let {_id, title, excerpt, userId, category, releasedAt} = desiredBooks
+        return res.status(200).send({status:true, message: "your data is here",data: desiredBooks})   
+    }
+    if(Object.keys(query).length != 0){
+        let filteredBooks = await bookModel.find(req.query).populate("userId")
+    }
+} catch (err) {
+    return res.status(500).send({status:false, message:err.message})
+}    
+}
+
 module.exports={createBook}
     
