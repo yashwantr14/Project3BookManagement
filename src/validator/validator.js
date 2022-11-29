@@ -1,6 +1,10 @@
+const {mongoose} = require('mongoose')
+
 //===============================>> String Validation <<==================================>>>
 const isValid = function (value) {
-    return (typeof value === "string" &&  value.trim().length > 0 && value.match(/^[\D]+$/)) 
+  if (typeof value === "undefined" || value === null) return false;
+  if (typeof value === "string" && value.trim().length === 0) return false;
+  return true;
 };
 
   //================================>> Email Validation <<===================================>>>
@@ -19,7 +23,7 @@ const isValidPhone = function (phone) {
 
 const isValidPassword = function (pwd) {
     let passwordRegex =
-      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,16}$/;
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,15}$/;
   
     if (passwordRegex.test(pwd)) {
       return true;
@@ -27,5 +31,12 @@ const isValidPassword = function (pwd) {
       return false;
     }
   };
+
+//===============================>> Pincode Validation <<====================================>>>
+
+const isValidPinCode = function (pinCode) {
+  const pinCodeRegex = /^[1-9][0-9]{5}$/;
+  return pinCodeRegex.test(pinCode);
+};
   
-  module.exports = { isValid, isValidEmail, isValidPhone, isValidPassword };
+  module.exports = { isValid, isValidEmail, isValidPhone, isValidPassword,isValidPinCode };
