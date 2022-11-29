@@ -1,13 +1,15 @@
 const express = require("express")
 const router = express.Router()
-const userController = require("../controllers/userController");
 
 const{createUser }=require('../controllers/userController')
-const{createBook}=require('../controllers/bookController')
+const{createBook, getBooks}=require('../controllers/bookController')
 
 //****************************** Post API's ***************************************/
 router.post("/register",createUser)
 router.post('/books',createBook)
+
+//********************************** GET API's *************************************/
+router.get("/getBooks", getBooks)
 
 /***************************** Path not match**************************************/
 router.all("/*", async function (req, res) {
