@@ -13,13 +13,12 @@ const bookSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "user",
+     required: true,
+      ref: "createUser",
     },
     ISBN: {
       type: String,
-      required: true,
-      unique: true,
+       unique: true,
     },
     category: {
       type: String,
@@ -41,12 +40,12 @@ const bookSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    releasedAt: {
-      type: Date,
-      required: true,
-    },
+    // releasedAt: {
+    //   type: Date,
+    //   required: true,
+    // },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('book',bookSchema)
+module.exports = mongoose.model('BookDb',bookSchema)

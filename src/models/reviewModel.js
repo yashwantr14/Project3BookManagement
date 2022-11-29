@@ -4,12 +4,12 @@ const reviewerSchema = new mongoose.Schema({
   bookId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "book",
+    ref: "BookDb",
   },
   reviewedBy: {
     type: String,
     required: true,
-    // default 'Guest',
+     default :"Guest",
     // value:
   },
   reviewedAt: {
