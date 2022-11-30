@@ -9,11 +9,13 @@ const createBook = async function (req, res){
         const requestBody = req.body
        
         let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = requestBody
-        if(!isValidBody(requestBody)){return res.status(400).send({status:false,message:"plz provide request body"})}
+        if(!(title&&excerpt&&userId&&ISBN&&category&&subcategory)) return res.status(400).send({status:false, message:"Fill all the fields which are neccessary"})
+        
+        // if(!isValidBody(requestBody)){return res.status(400).send({status:false,message:"plz provide request body"})}
         
         if(!isValid(title)){return res.status(400).send({status:false,message:"plz provide title"})}
 
-        if(!isValidTitle(title)){return res.status(400).send({status:false,message:"plz provide valid title"})}
+        // if(!isValidTitle(title)){return res.status(400).send({status:false,message:"plz provide valid title"})}
 
         const titleUsed = await booksModel.findOne({ title: title })
 
@@ -23,7 +25,7 @@ const createBook = async function (req, res){
 
         if(!isValid(ISBN)){return res.status(400).send({status:false,message:"plz provide ISBN"})}
 
-        if(!validateISBN(ISBN)){return res.status(400).send({status:false,message:"plz provide valid ISBN"})}
+        // if(!validateISBN(ISBN)){return res.status(400).send({status:false,message:"plz provide valid ISBN"})}
 
         const isISBNAlreadyUsed = await booksModel.findOne({ ISBN: ISBN })
 
@@ -33,7 +35,7 @@ const createBook = async function (req, res){
 
         if(!isValid(subcategory)){return res.status(400).send({status:false,message:"plz provide subCategory"})}
 
-        //if(!isValid(releasedAt)){return res.status(400).send({status:false,message:"plz provide realeasedAt"})}
+        // if(!isValid(releasedAt)){return res.status(400).send({status:false,message:"plz provide realeasedAt"})}
 
         if(!isValidObjectId(userId)){return res.status(400).send({status:false,message:"plz provide valid userId"})}
         
@@ -42,7 +44,7 @@ const createBook = async function (req, res){
         const validId = await userModel.findById({ _id: userId })
         if(!validId) {return res.status(400).send({ status: false, msg: "userId does not exist" })}
         const bookData = await booksModel.create( requestBody )
-        return res.status(201).send({ status: true, msg: "created successfully", data: bookData })
+        return res.status(201).send({ status: true, message: "created successfully", data: bookData })
   }
   catch(err){
     return res.status(500).send({status:false,messege:err.msg})

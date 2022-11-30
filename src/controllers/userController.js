@@ -53,7 +53,7 @@ const createUser = async function(req,res){
         return res.status(500).send({status:false , message:error.message})
     }
 }
-exports.loginUser = async (req,res)=>{
+const loginUser = async (req,res)=>{
         try {
             let credentials = req.body
             let {email, password} = credentials
@@ -82,3 +82,4 @@ exports.loginUser = async (req,res)=>{
     }
 
 module.exports.createUser = createUser
+module.exports.loginUser = loginUser
