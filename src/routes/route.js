@@ -1,13 +1,14 @@
 const express = require("express")
 const router = express.Router()
 
-const{createUser }=require('../controllers/userController')
+const{createUser, loginUser }=require('../controllers/userController')
 const{createBook, getBooks, bookById, deleteBook, updateBook}=require('../controllers/bookController')
 const {createReview} = require("../controllers/reviewController")
-
+const {authorisation, authentication} = require("../middleware/auth")
 //****************************** Post API's ***************************************/
 router.post("/register",createUser)
-router.post('/books',createBook)
+router.post("/login",loginUser)
+router.post('/books',authentication,authorisation,createBook)
 router.post("/books/:bookId/review", createReview)
 
 //********************************** GET API's *************************************/

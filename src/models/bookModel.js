@@ -40,10 +40,10 @@ const bookSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    // releasedAt: {
-    //   type: Date,
-    //   required: true,
-    // },
+    releasedAt: {
+      type: Date,
+      required: true,
+    },
   },
   { timestamps: true }
 );

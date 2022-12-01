@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel")
 const booksModel = require("../models/bookModel")
-const{isValid,isValidTitle,isValidBody,validateISBN}=require('../validator/validator')
+const reviewModel = require("../models/reviewModel")
+const{isValid,isValidTitle,isValidBody,validateISBN,invalidInput, isValidDate}=require('../validator/validator')
 const {isValidObjectId}=require('mongoose')
 
 
@@ -38,6 +39,8 @@ const createBook = async function (req, res){
         // if(!isValid(releasedAt)){return res.status(400).send({status:false,message:"plz provide realeasedAt"})}
 
         if(!isValidObjectId(userId)){return res.status(400).send({status:false,message:"plz provide valid userId"})}
+
+        if(!isValidDate(releasedAt)) return res.status(400).send({status: false, message:"The date should be in ISO format"})
         
 
 
@@ -47,7 +50,7 @@ const createBook = async function (req, res){
         return res.status(201).send({ status: true, message: "created successfully", data: bookData })
   }
   catch(err){
-    return res.status(500).send({status:false,messege:err.msg})
+    return res.status(500).send({status:false,messege:err.message})
   }     
   
 }
@@ -56,13 +59,12 @@ const getBooks = async (req,res)=>{
 try {
     let query = req.query
     if(Object.keys(query).length == 0){
-        let desiredBooks = await booksModel.find({isDeleted:false})//.populate("userId")
-        // let {_id, title, excerpt, userId, category, releasedAt} = desiredBooks
+        let desiredBooks = await booksModel.find({isDeleted:false}).collation({ locale: "en" }).sort({ title: 1 })//.populate("userId")
         return res.status(200).send({status:true, message: "your data is here",data: desiredBooks})   
     }
     if(Object.keys(query).length != 0){
       req.query.isDeleted = false
-        let filteredBooks = await booksModel.find(req.query).sort((a) => a.title)//.populate("userId").sort((a,b)=> a.title >b.title? 1:-1)
+        let filteredBooks = await booksModel.find(req.query).collation({ locale: "en" }).sort({ title: 1 })
         if(filteredBooks.length == 0){
           return res.status(404).send({status:true, message:"No books found with the matching filter"})
         } else{
@@ -81,13 +83,13 @@ const bookById = async function (req, res) {
 
       const reqBookId = req.params.bookId
 
-      if (!isValid.invalidInput(reqBookId)) {
-          return res.status(404).send({ status: false, msg: "pls provide bookId" })
-      }
-      if (!isValid.isValidObjectId(reqBookId)) {
-          return res.status(404).send({ status: false, msg: "invalid bookId" })
-      }
-      let bookInfo = await bookModel.findOne({ _id: reqBookId, isDeleted: false })
+      if (!invalidInput(reqBookId)) {
+        return res.status(400).send({ status: false, msg: "pls provide bookId" })
+    }
+    if (!isValidObjectId(reqBookId)) {
+        return res.status(400).send({ status: false, msg: "invalid bookId" })
+    }
+      let bookInfo = await booksModel.findOne({ _id: reqBookId, isDeleted: false })
       if (!bookInfo) {
           return res.status(404).send({ status: false, msg: "book not found" })
       }
@@ -113,7 +115,7 @@ const bookById = async function (req, res) {
   let bookId=req.params.bookId
   let body=req.body
 
-  if(!isValidBody(body)) return res.status(400).send({status: false, message:"Please provide details in body to update"})
+  // if(!isValidBody(body)) return res.status(400).send({status: false, message:"Please provide details in body to update"})
   let {title, excerpt, releasedAt, ISBN}=body
   
   if(!isValidObjectId) res.status(400).send({status:false, message:"Invalid bookId"})
@@ -127,7 +129,7 @@ const bookById = async function (req, res) {
   if(ISBN) if(!validateISBN(ISBN)) res.status(400).send({status:false, message:"Invalid ISBN"})
 
   //--------Cheking if body attributes are duplicate---------//
-  let duplicateTitle=await booksModel.findOne({title:title})
+  let duplicateTitle=await booksModel.findOne({title:title})                                          
   if(duplicateTitle) return res.status(400).send({status:false, message:"Title is already in use"})
 
   
@@ -151,8 +153,9 @@ const deleteBook = async function (req, res) {
       }else{
           obj.bookId = req.params.bookId;
     }
+    let today= moment().format('YYYY-MM-DD, hh:mm:ss a')
 
-    let findBook = await bookModel.findOneAndUpdate({ _id: obj.bookId, isDeleted: false },{ $set:{ isDeleted: true } , deletedAt: Date.now() },{ new: true });
+    let findBook = await booksModel.findOneAndUpdate({ _id: obj.bookId, isDeleted: false },{ $set:{ isDeleted: true } , deletedAt: Date.now() },{ new: true });
     if (!isValidObjectId(findBook))
       return res.status(404).send({ status: false, message: "No Books Found" });
 

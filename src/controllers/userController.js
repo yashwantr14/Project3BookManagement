@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken")
 const userModel = require('../models/userModel')
 const { isValidEmail, isValid, isValidPhone,isValidPassword ,isValidPinCode} = require("../validator/validator")
 
@@ -75,7 +76,7 @@ const loginUser = async (req,res)=>{
                 password:credentialsCheck.password
             }, "Secret-Key",{expiresIn:"1h"})
             res.setHeader("x-api-key",token)
-            return res.status(200).send({ status:true, message:"token generated succesfully"})
+            return res.status(200).send({ status:true, message:"token generated succesfully",data:token})
         } catch (err) {
             res.status(500).send({status:false, message:err.message})
         }
