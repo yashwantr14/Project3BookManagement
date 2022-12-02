@@ -13,7 +13,7 @@ const createReview = async (req, res) => {
     //=============================== Checking the Required fields in the Body ==============================//
 
     if(!bookId) return res.status(400).send({Status: false, message:"Please provide bookId inside the body"})
-    if(!reviewedBy) return res.status(400).send({Status: false, message:"Please provide reviewr's name inside the body"})
+    if(!reviewedBy) return res.status(400).send({Status: false, message:"Please provide reviewer's name inside the body"})
     if(!reviewedAt) return res.status(400).send({Status: false, message:"Please provide reviewing date inside the body"})
     if(!rating) return res.status(400).send({Status:false, Message:"Please provide rating inside the body"})
 
@@ -56,99 +56,42 @@ const createReview = async (req, res) => {
 
 const updateReview = async function (req, res) {
   try {
-    const bookId = req.params.bookId;
-    const reviewId = req.params.reviewId;
-    const data = req.body;
-    const { review, rating, reviewedBy } = data;
 
-    // if (!valid.isValidObjectId(bookId)) {
-    //   return res.status(400).send({ status: false, message: "userId not valid" });
-    // }
-    // if (!valid.isValidObjectId(reviewId)) {
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: " reviewId not valid" });
-    // }
-    // if (!valid.isValidRequestBody(data)) {
-    //   return res
-    //     .status(400)
-    //     .send({
-    //       status: false,
-    //       message: "please provide some data to update review",
-    //     });
-    // }
+    let bookIdInParam = req.params.bookId;
+    if(!isValidObjectId(bookIdInParam)) return res.status(400).send({Status:false, Message:"Invalid bookId in Param"})
+    let reviewId=req.params.reviewId
+    if(!isValidObjectId(reviewId)) return res.status(400).send({Status:false, Message:"Invalid reviewId in Param"})
+    let reviewerData = req.body;
+    if(!valid.isValidBody(reviewerData)) return res.status(400).send({Status:false, Message:"Please provide data inside body"})
+    
+    let bookToUpdate=await bookModel.findById({_id:bookIdInParam})
+    if(!bookToUpdate || bookToUpdate.isDeleted==true) return res.status(404).send({Status:false, Message:"Book not found"})
 
-    let Obj1 = {};
+    let reviewExist=await reviewModel.findById({_id:reviewId})
+    if(!reviewExist || reviewExist.isDeleted==true) return res.status(404).send({Status:false, Message:"Review not found"})
 
-    if (reviewedBy) {
-      if (!valid.invalidInput(reviewedBy)) {
-        return res
-          .status(400)
-          .send({ status: false, message: "reviewers name is in proper format" });
-      }
-      if (!valid.isValidName(reviewedBy))
-        return res
-          .status(400)
-          .send({ status: false, message: "reviewers name is invalid" });
+    let {review, rating, reviewedBy}=reviewerData
 
-      Obj1.reviewedBy = reviewedBy;
-    } else {
-      Obj1.reviewedBy = "Guest";
-    }
+    //====================== Checking the required updating data in body ================================
+    if(!rating) return res.status(400).send({Status:false, Message:"Please provide rating inside the body"})
+    if(!reviewedBy) return res.status(400).send({Status:false, Message:"Please provide reviewer's name inside the body"})
 
-    if (!rating) {
-      return res.status(400).send({ status: false, message: "rating is required" });
-    }
-    if (rating) {
-      if (!(typeof rating === "number")) {
-        return res
-          .status(400)
-          .send({ status: false, message: "rating should be a number" });
-      }
-      if (!valid.onlyNumbers(rating))
-        return res
-          .status(400)
-          .send({ status: false, message: "rating should be between 1 to 5" });
-    }
 
-    Obj1.rating = rating;
 
-    Obj1.review = review;
+    //=============================== Checking validations for the body fields ============================
+    if(!valid.isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
+    if(!valid.invalidInput(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
 
-    const findBook = await bookModel.findOne({ _id: bookId, isDeleted: false });
-    if (!findBook) {
-      return res.status(404).send({ status: false, message: " book not found" });
-    }
-    const findReview = await reviewModel.findOne({
-      _id: reviewId,
-      isDeleted: false,
-    });
-    if (!findReview) {
-      return res
-        .status(404)
-        .send({ status: false, message: "review does not exist" });
-    }
-    if (findReview.bookId != bookId) {
-      return res
-        .status(404)
-        .send({ status: false, message: "Review not found for this book" });
-    }
 
-    const updatedReviews = await reviewModel
-      .findOneAndUpdate(
-        { _id: reviewId, isDeleted: false },
-        { $set: Obj1 },
-        { new: true }
-      )
-      .select({ deletedAt: 0 });
-    return res
-      .status(200)
-      .send({
-        status: true,
-        message: "Successfully updated the review of the book.",
-        data: findBook,
-        updatedReviews,
-      });
+
+    let rev=await reviewModel.findByIdAndUpdate({_id : reviewId}, {$set : reviewerData}, {new:true})
+
+    let objectBook={}
+    objectBook.bookUpdated=bookToUpdate
+    objectBook.reviewUpdated=rev
+
+    res.status(200).send({Message:true, Message:"Success", Data:objectBook})
+    
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }
