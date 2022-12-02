@@ -131,7 +131,7 @@ const getBooks = async (req, res) => {
         return res
           .status(404)
           .send({
-            status: true,
+            status: false,
             message: "No books found with the matching filter",
           });
       } else {
@@ -161,7 +161,7 @@ const bookById = async function (req, res) {
       return res.status(400).send({ status: false, msg: "invalid bookId" });
     }
     let bookInfo = await booksModel.findOne({
-      _id: reqBookId,
+      userId: reqBookId,
       isDeleted: false,
     });
     if (!bookInfo) {

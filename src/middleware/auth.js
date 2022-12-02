@@ -35,8 +35,10 @@ const authorisation = async (req, res, next) => {
                 let checkUserId = await bookModel.find({ _id: bookId }).select({ userId: 1, _id: 0 })
                 let userId = checkUserId.map(x => x.userId)  // this is the userId of the book to be updated
     
-                let id = decodedtoken.userId
+                let id = decodedtoken.id
                 if (id != userId) return res.status(403).send({ status: false, msg: "You are not authorised to perform this task" })
+                
+                next()
             }
             else {
                 bookId = req.body.userId
