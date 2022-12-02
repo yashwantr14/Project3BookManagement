@@ -13,12 +13,12 @@ const createUser = async function (req, res) {
     let data = req.body;
     const { title, name, phone, email, password, address } = data;
     if (Object.keys(data).length == 0) {
-      res.status(404).send({ status: false, message: "Data not found" });
+      return res.status(404).send({ status: false, message: "Data not found" });
     }
     let { street, city, pincode } = data.address;
 
     if (!title) {
-      res
+     return res
         .status(400)
         .send({ status: false, message: "Please provide the title" });
     }
@@ -32,7 +32,7 @@ const createUser = async function (req, res) {
         });
 
     if (!name) {
-      res
+     return res
         .status(400)
         .send({ status: false, message: "Please provide the name" });
     }
@@ -42,7 +42,7 @@ const createUser = async function (req, res) {
         .send({ status: false, msg: "please provide the valid name" });
 
     if (!phone) {
-      res
+     return res
         .status(400)
         .send({ status: false, message: "Please provide the phone number" });
     }
@@ -52,7 +52,7 @@ const createUser = async function (req, res) {
         .send({ status: false, msg: "please provide the valid phone number" });
 
     if (!email) {
-      res
+      return res
         .status(400)
         .send({ status: false, message: "Please provide the email" });
     }
@@ -67,7 +67,7 @@ const createUser = async function (req, res) {
         .send({ status: false, message: "Enter Unique email Id" });
 
     if (!password) {
-      res
+      return res
         .status(400)
         .send({ status: false, message: "Please provide the passsord" });
     }
@@ -77,7 +77,7 @@ const createUser = async function (req, res) {
         .send({ status: false, message: " please provide valid password" });
 
     if (!address) {
-      res
+      return  res
         .status(400)
         .send({ status: false, message: "Please provide the address" });
     }
