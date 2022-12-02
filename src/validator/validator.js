@@ -1,12 +1,20 @@
 const { mongoose } = require("mongoose");
 
 //===============================>> String Validation <<==================================>>>
-// const isValid = function (value) {
-//   if (typeof value === "undefined" || value === null) return false;
-//   if (typeof value === "string" && value.trim().length === 0) return false;
-//   return true;
-// };
 
+const isValid = function (value) {
+  if (typeof value === "undefined" || value === null) return false;
+  
+  if (typeof value === "string" && value.trim().length === 0) return false;
+  
+  return true;
+};
+const invalidInput = function (value) {
+  if (typeof value === "undefined" || value === null) return false;
+  if (typeof value === "string" && value.trim().length === 0) return false;
+  if (typeof value !== "string") return false;
+  return true;
+};
 //================================>> Email Validation <<===================================>>>
 
 const isValidEmail = function (email) {
@@ -46,13 +54,6 @@ const isValidTitle = (name) => {
   return regex;
 };
 
-const isValid = function (value) {
-  if (typeof value === "undefined" || value === null) return false;
-
-  if (typeof value === "string" && value.trim().length === 0) return false;
-
-  return true;
-};
 const validateISBN = function (ISBN) {
   //var re = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/ ;
   var re =
@@ -67,12 +68,6 @@ const isValidPinCode = function (pinCode) {
   return pinCodeRegex.test(pinCode);
 };
 
-const invalidInput = function (value) {
-  if (typeof value === "undefined" || value === null) return false;
-  if (typeof value === "string" && value.trim().length === 0) return false;
-  if (typeof value !== "string") return false;
-  return true;
-};
 const isValidDate = function (date) {
   let dateReg = /^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/gm;
   return dateReg.test(date);
