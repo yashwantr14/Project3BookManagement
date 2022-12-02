@@ -9,15 +9,14 @@ const reviewerSchema = new mongoose.Schema({
   reviewedBy: {
     type: String,
     required: true,
-     default :"Guest",
-    // value:
   },
   reviewedAt: {
-    type: Date,
+    type: String,
     required: true
   },
   rating: {
-    type: Number//min 1, max 5, mandatory
+    type: Number, //min 1, max 5, mandatory
+    required:true
   },
   review: {
     type: String,

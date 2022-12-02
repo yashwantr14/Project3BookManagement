@@ -21,7 +21,7 @@ const createReview = async (req, res) => {
     //=============================== Checking validations for the body fields ============================
     if(!isValidObjectId(bookId)) return res.status(400).send({Status:false, message:"Invalid bookId in the body"})
     if(!valid.invalidInput(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
-    if(!valid.isValidDate(reviewedAt)) return res.status(400).send({Status:false, Message:"Invalid review date"})
+    if(!valid.isValidDate(reviewedAt)) return res.status(400).send({Status:false, Message:"Invalid date format!  (valid format : YYYY-MM-DD)"})
     if(!valid.isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
 
     const findBook = await bookModel.findById({
@@ -91,7 +91,7 @@ const updateReview = async function (req, res) {
     objectBook.reviewUpdated=rev
 
     res.status(200).send({Message:true, Message:"Success", Data:objectBook})
-    
+
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }
@@ -101,60 +101,23 @@ const updateReview = async function (req, res) {
 
 const deleteReview = async function (req, res) {
   try {
-    let bookId = req.params.bookId;
+    let bookIdInParam = req.params.bookId;
+    if(!isValidObjectId(bookIdInParam)) return res.status(400).send({Status:false, Message:"Invalid bookId in Param"})
+    let reviewId=req.params.reviewId
+    if(!isValidObjectId(reviewId)) return res.status(400).send({Status:false, Message:"Invalid reviewId in Param"})
+    
+    let reviewExist=await reviewModel.findById({_id:reviewId})
+    if(!reviewExist || reviewExist.isDeleted==true) return res.status(404).send({Status:false, Message:"Review not found"})
+    
+    let bookToUpdate=await bookModel.findById({_id:bookIdInParam})
+    if(!bookToUpdate || bookToUpdate.isDeleted==true) return res.status(404).send({Status:false, Message:"Book not found"})
 
-    if (!valid.isValidObjectId(bookId))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter valid bookId...!" });
-
-    const bookExist = await bookModel
-      .findOne({ _id: bookId, isDeleted: false })
-      .select({ deletedAt: 0 });
-
-    if (!bookExist)
-      return res
-        .status(404)
-        .send({ status: false, message: "No such book found...!" });
-
-    let reviewId = req.params.reviewId;
-
-    if (!valid.isValidObjectId(reviewId))
-      return res
-        .status(400)
-        .send({ status: false, message: "enter valid reviewId...!" });
-
-    const reviewExist = await reviewModel.findOne({
-      _id: reviewId,
-      bookId: bookId,
-    });
-
-    if (!reviewExist)
-      return res
-        .status(404)
-        .send({ status: false, message: "review not found...!" });
-
-    if (reviewExist.isDeleted == true)
-      return res
-        .status(404)
-        .send({ status: false, data: "review is already deleted...!" });
-    if (reviewExist.isDeleted == false) {
-      await reviewModel.findOneAndUpdate(
-        { _id: reviewId, bookId: bookId, isDeleted: false },
-        { $set: { isDeleted: true } },
-        { new: true }
-      );
-
-      const addCount = await bookModel.findOneAndUpdate(
-        { _id: bookId },
-        { $inc: { reviews: -1 } },
-        { new: true }
-      );
-
-      return res
-        .status(200)
-        .send({ status: true, message: "successfully deleted review" });
-    }
+    await reviewModel.findByIdAndUpdate({_id:reviewId}, {$set:{isDeleted:true}},{new:true})
+    
+    await bookModel.findByIdAndUpdate({_id:bookIdInParam}, {$inc:{reviews:-1}},{new:true})
+    
+    return res.status(200).send({Status:true, Message:"Review deleted successfully"})
+  
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }
