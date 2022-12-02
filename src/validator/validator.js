@@ -73,6 +73,11 @@ const isValidDate = function (date) {
   return dateReg.test(date);
 };
 
+const isValidRating = function(rating){
+  let ratingReg= /^([1-5]|1[05])$/
+  return ratingReg.test(rating)
+}
+
 module.exports = {
   isValid,
   isValidEmail,
@@ -84,4 +89,5 @@ module.exports = {
   validateISBN,
   isValidTitle,
   isValidBody,
-};
+  isValidRating
+}

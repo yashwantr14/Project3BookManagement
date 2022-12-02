@@ -1,26 +1,43 @@
 const reviewModel = require("../models/reviewModel");
 const bookModel = require("../models/bookModel");
-const valid = require("../validator/validator")
+const valid = require("../validator/validator");
+const { isValidObjectId } = require("mongoose");
 const createReview = async (req, res) => {
   try {
-    let bookId = req.params.bookId;
+    let bookIdInParam = req.params.bookId;
+    if(!isValidObjectId(bookIdInParam)) return res.status(400).send({Status:false, Message:"Invalid bookId in Param"})
     let reviewerData = req.body;
-    let { review, reviewedAt, reviewedBy, rating } = reviewerData;
+    if(!valid.isValidBody(reviewerData)) return res.status(400).send({Status:false, Message:"Please provide data inside body"})
+    let {bookId,review, reviewedAt, reviewedBy, rating } = reviewerData;
+
+    //=============================== Checking the Required fields in the Body ==============================//
+
+    if(!bookId) return res.status(400).send({Status: false, message:"Please provide bookId inside the body"})
+    if(!reviewedBy) return res.status(400).send({Status: false, message:"Please provide reviewr's name inside the body"})
+    if(!reviewedAt) return res.status(400).send({Status: false, message:"Please provide reviewing date inside the body"})
+    if(!rating) return res.status(400).send({Status:false, Message:"Please provide rating inside the body"})
+
+
+    //=============================== Checking validations for the body fields ============================
+    if(!isValidObjectId(bookId)) return res.status(400).send({Status:false, message:"Invalid bookId in the body"})
+    if(!valid.invalidInput(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
+    if(!valid.isValidDate(reviewedAt)) return res.status(400).send({Status:false, Message:"Invalid review date"})
+    if(!valid.isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
 
     const findBook = await bookModel.findById({
-      _id: bookId,
+      _id: bookIdInParam,
       isDeleted: false,
     });
-    if (!findBook)
+    if (!findBook || findBook.isDeleted==true)
       return res
-        .status(400)
-        .send({ status: false, message: "This book is not available" });
+        .status(404)
+        .send({ status: false, message: "Book not found" });
 
     const createReviews = await reviewModel.create(reviewerData);
     if (Object.keys(createReviews).length !== 0) {
-      const updateReviewCount = await bookModel.updateOne(
-        { _id: bookId },
-        { $inc: { review: +1 } },
+      const updateReviewCount = await bookModel.findByIdAndUpdate(
+        { _id: bookIdInParam },
+        { $inc: { reviews: +1 } },
         { new: true }
       );
     }
