@@ -1,32 +1,33 @@
 const { mongoose } = require("mongoose");
 
-//===============================>> String Validation <<==================================>>>
+//================================================Empty Body Validation=============================================================================================================
+const isValidBody = (data) => {
+  if (Object.keys(data).length > 0) {
+    return true;
+  }
+  return false;
+};
+//==============================================String Validation===========================================================================================================================
 
 const isValid = function (value) {
-  if (typeof value === "undefined" || value === null) return false;
-  
-  if (typeof value === "string" && value.trim().length === 0) return false;
-  
-  return true;
-};
-const invalidInput = function (value) {
   if (typeof value === "undefined" || value === null) return false;
   if (typeof value === "string" && value.trim().length === 0) return false;
   if (typeof value !== "string") return false;
   return true;
 };
-//================================>> Email Validation <<===================================>>>
+
+//===============================================Email Validation=========================================================================================================================
 
 const isValidEmail = function (email) {
   return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
 };
-//===============================>> Mobile Validation <<====================================>>>
+//===============================================Mobile Validation========================================================================================================================
 
 const isValidPhone = function (phone) {
   return /^([+]\d{2})?\d{10}$/.test(phone);
 };
 
-//===============================>> Password Validation <<====================================>>>
+//===============================================Password Validation===========================================================================================================================
 
 const isValidPassword = function (pwd) {
   let passwordRegex =
@@ -39,21 +40,13 @@ const isValidPassword = function (pwd) {
   }
 };
 
-//isValidBody
-const isValidBody = (data) => {
-  if (Object.keys(data).length > 0) {
-    return true;
-  }
-  return false;
-};
-
-//name
+//================================================Title Validation===================================================================================================================
 const isValidTitle = (name) => {
   const nm = name.trim();
   const regex = /^[a-z" "A-Z]+(([',. -][a-z" "A-Z ])?[a-z" "A-Z])$/.test(nm);
   return regex;
 };
-
+//================================================ISBN Validation===================================================================================================================
 const validateISBN = function (ISBN) {
   //var re = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/ ;
   var re =
@@ -61,33 +54,32 @@ const validateISBN = function (ISBN) {
   return re.test(ISBN.trim());
 };
 
-//===============================>> Pincode Validation <<====================================>>>
+//================================================Pincode Validation===================================================================================================================
 
 const isValidPinCode = function (pinCode) {
   const pinCodeRegex = /^[1-9][0-9]{5}$/;
   return pinCodeRegex.test(pinCode);
 };
-
+//================================================Date Validation===================================================================================================================
 const isValidDate = function (date) {
   let dateReg = /^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/gm;
   return dateReg.test(date);
 };
-
+//================================================Rating Validation===================================================================================================================
 const isValidRating = function(rating){
   let ratingReg= /^([1-5]|1[05])$/
   return ratingReg.test(rating)
 }
 
 module.exports = {
+  isValidBody,
   isValid,
   isValidEmail,
   isValidPhone,
   isValidPassword,
-  isValidPinCode,
-  invalidInput,
-  isValidDate,
-  validateISBN,
   isValidTitle,
-  isValidBody,
+  validateISBN,
+  isValidPinCode,
+  isValidDate,
   isValidRating
 }

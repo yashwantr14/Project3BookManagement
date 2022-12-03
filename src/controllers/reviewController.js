@@ -1,13 +1,14 @@
 const reviewModel = require("../models/reviewModel");
 const bookModel = require("../models/bookModel");
-const valid = require("../validator/validator");
+const { isValidBody, isValid, isValidDate, isValidRating } = require("../validator/validator");
 const { isValidObjectId } = require("mongoose");
+
 const createReview = async (req, res) => {
   try {
     let bookIdInParam = req.params.bookId;
     if(!isValidObjectId(bookIdInParam)) return res.status(400).send({Status:false, Message:"Invalid bookId in Param"})
     let reviewerData = req.body;
-    if(!valid.isValidBody(reviewerData)) return res.status(400).send({Status:false, Message:"Please provide data inside body"})
+    if(!isValidBody(reviewerData)) return res.status(400).send({Status:false, Message:"Please provide data inside body"})
     let {bookId,review, reviewedAt, reviewedBy, rating } = reviewerData;
 
     //=============================== Checking the Required fields in the Body ==============================//
@@ -20,9 +21,9 @@ const createReview = async (req, res) => {
 
     //=============================== Checking validations for the body fields ============================
     if(!isValidObjectId(bookId)) return res.status(400).send({Status:false, message:"Invalid bookId in the body"})
-    if(!valid.invalidInput(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
-    if(!valid.isValidDate(reviewedAt)) return res.status(400).send({Status:false, Message:"Invalid date format!  (valid format : YYYY-MM-DD)"})
-    if(!valid.isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
+    if(!isValid(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
+    if(!isValidDate(reviewedAt)) return res.status(400).send({Status:false, Message:"Invalid date format!  (valid format : YYYY-MM-DD)"})
+    if(!isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
 
     const findBook = await bookModel.findById({
       _id: bookIdInParam,
@@ -62,7 +63,7 @@ const updateReview = async function (req, res) {
     let reviewId=req.params.reviewId
     if(!isValidObjectId(reviewId)) return res.status(400).send({Status:false, Message:"Invalid reviewId in Param"})
     let reviewerData = req.body;
-    if(!valid.isValidBody(reviewerData)) return res.status(400).send({Status:false, Message:"Please provide data inside body"})
+    if(!isValidBody(reviewerData)) return res.status(400).send({Status:false, Message:"Please provide data inside body"})
     
     let bookToUpdate=await bookModel.findById({_id:bookIdInParam})
     if(!bookToUpdate || bookToUpdate.isDeleted==true) return res.status(404).send({Status:false, Message:"Book not found"})
@@ -79,8 +80,8 @@ const updateReview = async function (req, res) {
 
 
     //=============================== Checking validations for the body fields ============================
-    if(!valid.isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
-    if(!valid.invalidInput(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
+    if(!isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
+    if(!isValid(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
 
 
 
