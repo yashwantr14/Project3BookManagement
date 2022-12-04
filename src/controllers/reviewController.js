@@ -1,58 +1,78 @@
 const reviewModel = require("../models/reviewModel");
 const bookModel = require("../models/bookModel");
-const { isValidBody, isValid, isValidDate, isValidRating } = require("../validator/validator");
+const moment = require("moment")
+const { isValidBody, isValid, isValidDate, isValidRating, isValidName } = require("../validator/validator");
 const { isValidObjectId } = require("mongoose");
 
-const createReview = async (req, res) => {
-  try {
-    let bookIdInParam = req.params.bookId;
-    if(!isValidObjectId(bookIdInParam)) return res.status(400).send({Status:false, Message:"Invalid bookId in Param"})
-    let reviewerData = req.body;
-    if(!isValidBody(reviewerData)) return res.status(400).send({Status:false, Message:"Please provide data inside body"})
-    let {bookId,review, reviewedAt, reviewedBy, rating } = reviewerData;
 
-    //=============================== Checking the Required fields in the Body ==============================//
+const createReview = async function(req, res){
+  try{
+  let bookId = req.params.bookId
+  if(!isValidObjectId(bookId))
+  return res.status(400).send({status: false, message:  " please provide valid bookId"})
 
-    if(!bookId) return res.status(400).send({Status: false, message:"Please provide bookId inside the body"})
-    if(!reviewedBy) return res.status(400).send({Status: false, message:"Please provide reviewer's name inside the body"})
-    if(!reviewedAt) return res.status(400).send({Status: false, message:"Please provide reviewing date inside the body"})
-    if(!rating) return res.status(400).send({Status:false, Message:"Please provide rating inside the body"})
-
-
-    //=============================== Checking validations for the body fields ============================
-    if(!isValidObjectId(bookId)) return res.status(400).send({Status:false, message:"Invalid bookId in the body"})
-    if(!isValid(reviewedBy)) return res.status(400).send({Status:false, message:"Invalid reviewer's name"})
-    if(!isValidDate(reviewedAt)) return res.status(400).send({Status:false, Message:"Invalid date format!  (valid format : YYYY-MM-DD)"})
-    if(!isValidRating(rating)) return res.status(400).send({Status:false, Message:"Invalid ratings!... can be 1 to 5 only"})
-
-    const findBook = await bookModel.findById({
-      _id: bookIdInParam,
-      isDeleted: false,
-    });
-    if (!findBook || findBook.isDeleted==true)
-      return res
-        .status(404)
-        .send({ status: false, message: "Book not found" });
-
-    const createReviews = await reviewModel.create(reviewerData);
-    if (Object.keys(createReviews).length !== 0) {
-      const updateReviewCount = await bookModel.findByIdAndUpdate(
-        { _id: bookIdInParam },
-        { $inc: { reviews: +1 } },
-        { new: true }
-      );
-    }
-    return res
-      .status(201)
-      .send({
-        status: true,
-        message: "review created successfully",
-        data: createReviews,
-      });
-  } catch (err) {
-    return res.status(500).send({ status: false, message: err.message });
+  let checkId = await bookModel.findById(bookId)
+  if(!checkId) return res.status(404).send({status: false, message : "book not found"} )
+  if(checkId.isDeleted==true){
+      return res.status(404).send({status: false, message: "book is already deleted"})
   }
-};
+  let data= req.body
+  let {  reviewedBy, reviewedAt, rating, isDeleted, review } = data
+
+  let Obj={}
+
+      if (!isValidBody(data)) {
+          return res.status(400).send({ status: false, message: "please provide some data to create review" })
+      } 
+       Obj.bookId=bookId
+       
+       
+      if(reviewedBy){
+          if (!isValid(reviewedBy)) {
+              return res.status(400).send({ status: false, message: "reviewers name is in proper format" })
+          }
+           if(!isValidName(reviewedBy))
+           return res.status(400).send({ status: false, message: "reviewers name is invalid" })
+         
+              Obj.reviewedBy=reviewedBy
+      }else{
+          Obj.reviewedBy="Guest"
+      }
+      let today = moment().format("YYYY-MM-DD, hh:mm:ss a");
+      if (!reviewedAt) {
+          Obj.reviewedAt= today
+  }
+  if (!rating) {
+      return res.status(400).send({ status: false, message: "rating is required" })
+  }
+  if (rating){
+
+  if(!(typeof rating ==="number")){
+    return res.status(400).send({status:false, message:"rating should be a number"})
+  }
+    if (!isValidRating(rating))
+    return res.status(400).send({status:false, message:"rating should be between 1 to 5"})
+    }
+
+  
+  Obj.rating=rating
+
+    Obj.review=review
+
+  if (isDeleted == true) {
+      return res.status(400).send({ status: false, message: "you are deleting your data on the time of creation" })
+  }
+  Obj.isDeleted=isDeleted
+  const reviewCreate = await reviewModel.create(Obj)
+  
+ const addCount= await bookModel.findOneAndUpdate({_id:bookId},{$inc:{reviews:1}},  {new:true}).select({deletedAt:0})
+  return res.status(201).send({ status: true, message: "review is successfully done", data: addCount, reviewCreate })
+
+} catch (error) {
+  return res.status(500).send({ status: false, message: error.message })
+}
+
+}
 // -------------------------------------updateReview-------------------------------------------------------------------------------------------------------------
 
 const updateReview = async function (req, res) {

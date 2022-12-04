@@ -6,6 +6,7 @@ const {
   isValidPhone,
   isValidPassword,
   isValidPinCode,
+  isValidName,
 } = require("../validator/validator");
 
 const createUser = async function (req, res) {
@@ -40,6 +41,10 @@ const createUser = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, msg: "Please provide the valid name" });
+    if(!isValidName(name))
+      return res
+       .status(400)
+       .send({status: false, msg: "Please provide name in correct format"})
 
     if (!phone) {
      return res

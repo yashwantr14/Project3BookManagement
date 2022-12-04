@@ -15,6 +15,12 @@ const isValid = function (value) {
   if (typeof value !== "string") return false;
   return true;
 };
+//=================================================Name validation========================================================================================
+const isValidName = (value) => {
+  const regex = /^[a-zA-Z ]+(([',. -][a-zA-Z ])?[a-zA-Z ])$/.test(value);
+  return regex;
+};
+
 
 //===============================================Email Validation=========================================================================================================================
 
@@ -31,7 +37,7 @@ const isValidPhone = function (phone) {
 
 const isValidPassword = function (pwd) {
   let passwordRegex =
-    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,15}$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_\W]).{8,15}$/;
 
   if (passwordRegex.test(pwd)) {
     return true;
@@ -74,6 +80,7 @@ const isValidRating = function(rating){
 module.exports = {
   isValidBody,
   isValid,
+  isValidName,
   isValidEmail,
   isValidPhone,
   isValidPassword,

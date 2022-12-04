@@ -10,7 +10,7 @@ const authentication = function (req, res, next) {
 
         jwt.verify(token, "SecretKey", function (err, decodedToken) {
             if (err) {
-                return res.status(400).send({ status: false, msg: "token invalid" });
+                return res.status(400).send({ status: false, msg: "token invalid or expired" });
             } 
         
                 req.decodedToken = decodedToken
