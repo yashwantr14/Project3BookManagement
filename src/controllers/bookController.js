@@ -103,11 +103,7 @@ const validId = await userModel.findById({ _id: userId }); // Checking if user e
 const getBooks = async (req, res) => {
   try {
     let query = req.query;
-    if (Object.keys(query).length == 0) {
-      let desiredBooks = await booksModel
-        .find({ isDeleted: false })
-        .collation({ locale: "en" })
-        .sort({ title: 1 }); //.populate("userId")
+    if (Object.keys(query).length == 0) {let desiredBooks = await booksModel.find({ isDeleted: false }).collation({ locale: "en" }).sort({ title: 1 });
       return res
         .status(200)
         .send({

@@ -41,6 +41,8 @@ const createReview = async function(req, res){
       let today = moment().format("YYYY-MM-DD, hh:mm:ss a");
       if (!reviewedAt) {
           Obj.reviewedAt= today
+  }else{
+    Obj.reviewedAt=reviewedAt
   }
   if (!rating) {
       return res.status(400).send({ status: false, message: "rating is required" })
@@ -60,7 +62,7 @@ const createReview = async function(req, res){
     Obj.review=review
 
   if (isDeleted == true) {
-      return res.status(400).send({ status: false, message: "you are deleting your data on the time of creation" })
+      return res.status(400).send({ status: false, message: "you are not allowed to delete your data on the time of creation" })
   }
   Obj.isDeleted=isDeleted
   const reviewCreate = await reviewModel.create(Obj)
